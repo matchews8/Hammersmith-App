@@ -7,7 +7,7 @@ const POS_LABEL = { GK: "Goalkeepers", DEF: "Defenders", MID: "Midfielders", FWD
 
 // ─── Team Cards ──────────────────────────────────────────────────────────────
 
-function TeamCards({ teams, onSelect }) {
+function TeamCards({ teams, onSelect, events }) {
   return (
     <div style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
       <div style={{ marginBottom: 28 }}>
@@ -19,15 +19,16 @@ function TeamCards({ teams, onSelect }) {
       </div>
       <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
         {Object.values(teams).map(team => (
-          <TeamCard key={team.id} team={team} onClick={() => onSelect(team.id)} />
+          <TeamCard key={team.id} team={team} events={events} onClick={() => onSelect(team.id)} />
         ))}
       </div>
     </div>
   );
 }
 
-function TeamCard({ team, onClick }) {
+function TeamCard({ team, events, onClick }) {
   const [hovered, setHovered] = useState(false);
+  const nextMatch = getNextMatch(events, team.id);
   return (
     <div
       onClick={onClick}
@@ -67,12 +68,18 @@ function TeamCard({ team, onClick }) {
           fontSize: 9, fontWeight: 700, letterSpacing: 2, color: "#555",
           fontFamily: "'Barlow Condensed', sans-serif", marginBottom: 8,
         }}>NEXT MATCH</div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#cc0000", flexShrink: 0 }}/>
-          <span style={{ fontSize: 14, color: "#e8e8e8", fontWeight: 600 }}>vs {team.match.opponent}</span>
-        </div>
-        <div style={{ fontSize: 12, color: "#666", paddingLeft: 12 }}>{team.match.date} · {team.match.time}</div>
-        <div style={{ fontSize: 11, color: "#444", paddingLeft: 12, marginTop: 2 }}>{team.match.location}</div>
+        {nextMatch ? (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#cc0000", flexShrink: 0 }}/>
+              <span style={{ fontSize: 14, color: "#e8e8e8", fontWeight: 600 }}>vs {nextMatch.opponent}</span>
+            </div>
+            <div style={{ fontSize: 12, color: "#666", paddingLeft: 12 }}>{formatDateLong(nextMatch.date)} · {formatTime(nextMatch.time)}</div>
+            <div style={{ fontSize: 11, color: "#444", paddingLeft: 12, marginTop: 2 }}>{nextMatch.location}</div>
+          </>
+        ) : (
+          <div style={{ fontSize: 12, color: "#444", fontStyle: "italic" }}>No upcoming match</div>
+        )}
       </div>
 
       <div style={{
@@ -476,7 +483,7 @@ export default function SquadManagement({ teams, onAddPlayer, squadState, onSqua
 
   // No team selected → show team cards
   if (!selectedTeam) {
-    return <TeamCards teams={teams} onSelect={setSelectedTeam} />;
+    return <TeamCards teams={teams} onSelect={setSelectedTeam} events={events} />;
   }
 
   const team = teams[selectedTeam];
