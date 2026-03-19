@@ -1,5 +1,6 @@
 import { useState } from "react";
 import SquadSelector from "./SquadSelector";
+import { getNextMatch, formatDateLong, formatTime } from "./Calendar";
 
 const POS_COLOR = { GK: "#f59e0b", DEF: "#3b82f6", MID: "#22c55e", FWD: "#ef4444" };
 const POS_LABEL = { GK: "Goalkeepers", DEF: "Defenders", MID: "Midfielders", FWD: "Forwards" };
@@ -91,7 +92,7 @@ function TeamCard({ team, onClick }) {
 
 // ─── Team View ────────────────────────────────────────────────────────────────
 
-function TeamView({ team, selection, onOpenSelector, onAddPlayer, onBack }) {
+function TeamView({ team, selection, onOpenSelector, onAddPlayer, onBack, events }) {
   const [showAddModal, setShowAddModal] = useState(false);
 
   const xiCount = Object.values(selection.slots).filter(Boolean).length;
@@ -99,6 +100,8 @@ function TeamView({ team, selection, onOpenSelector, onAddPlayer, onBack }) {
 
   const playersByPos = { GK: [], DEF: [], MID: [], FWD: [] };
   team.players.forEach(p => playersByPos[p.pos]?.push(p));
+
+  const nextMatch = getNextMatch(events, team.id);
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -158,37 +161,52 @@ function TeamView({ team, selection, onOpenSelector, onAddPlayer, onBack }) {
               background: "#141414", border: "1px solid #1f1f1f",
               borderRadius: 8, padding: "20px 22px",
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-                <div>
-                  <div style={{ fontSize: 10, color: "#cc0000", fontWeight: 700, letterSpacing: 1.5, fontFamily: "'Barlow Condensed', sans-serif", marginBottom: 6 }}>UPCOMING FIXTURE</div>
-                  <div style={{
-                    fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
-                    fontSize: 22, color: "#e8e8e8", letterSpacing: 0.5, lineHeight: 1,
-                  }}>vs {team.match.opponent}</div>
-                </div>
-                <div style={{
-                  background: "rgba(204,0,0,0.12)", border: "1px solid rgba(204,0,0,0.25)",
-                  borderRadius: 4, padding: "4px 10px",
-                  fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700,
-                  fontSize: 10, letterSpacing: 1, color: "#cc0000",
-                }}>HOME</div>
-              </div>
-
-              <div style={{ display: "flex", gap: 16, marginBottom: 18 }}>
-                {[
-                  { label: "Date", value: team.match.date },
-                  { label: "Kick-off", value: team.match.time },
-                  { label: "Venue", value: team.match.location },
-                ].map(item => (
-                  <div key={item.label} style={{
-                    background: "#1a1a1a", borderRadius: 6, padding: "10px 14px", flex: 1,
-                  }}>
-                    <div style={{ fontSize: 9, color: "#444", marginBottom: 4, letterSpacing: 1 }}>{item.label.toUpperCase()}</div>
-                    <div style={{ fontSize: 12, color: "#ccc", fontWeight: 500 }}>{item.value}</div>
+              {nextMatch ? (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                    <div>
+                      <div style={{ fontSize: 10, color: "#cc0000", fontWeight: 700, letterSpacing: 1.5, fontFamily: "'Barlow Condensed', sans-serif", marginBottom: 6 }}>UPCOMING FIXTURE</div>
+                      <div style={{
+                        fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
+                        fontSize: 22, color: "#e8e8e8", letterSpacing: 0.5, lineHeight: 1,
+                      }}>vs {nextMatch.opponent}</div>
+                    </div>
+                    {nextMatch.homeAway && (
+                      <div style={{
+                        background: "rgba(204,0,0,0.12)", border: "1px solid rgba(204,0,0,0.25)",
+                        borderRadius: 4, padding: "4px 10px",
+                        fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700,
+                        fontSize: 10, letterSpacing: 1, color: "#cc0000",
+                      }}>{nextMatch.homeAway.toUpperCase()}</div>
+                    )}
                   </div>
-                ))}
-              </div>
-
+                  <div style={{ display: "flex", gap: 12, marginBottom: 18 }}>
+                    {[
+                      { label: "Date", value: formatDateLong(nextMatch.date) },
+                      { label: "Kick-off", value: formatTime(nextMatch.time) },
+                      { label: "Venue", value: nextMatch.location },
+                    ].map(item => (
+                      <div key={item.label} style={{
+                        background: "#1a1a1a", borderRadius: 6, padding: "10px 12px", flex: 1,
+                      }}>
+                        <div style={{ fontSize: 9, color: "#444", marginBottom: 4, letterSpacing: 1 }}>{item.label.toUpperCase()}</div>
+                        <div style={{ fontSize: 11, color: "#ccc", fontWeight: 500, lineHeight: 1.3 }}>{item.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div style={{ paddingBottom: 18 }}>
+                  <div style={{ fontSize: 10, color: "#555", fontWeight: 700, letterSpacing: 1.5, fontFamily: "'Barlow Condensed', sans-serif", marginBottom: 10 }}>UPCOMING FIXTURE</div>
+                  <div style={{
+                    background: "#1a1a1a", borderRadius: 6, padding: "16px",
+                    textAlign: "center", border: "1px dashed #252525",
+                  }}>
+                    <div style={{ fontSize: 13, color: "#444", marginBottom: 4 }}>No upcoming match scheduled</div>
+                    <div style={{ fontSize: 11, color: "#333" }}>Add one via the Calendar section</div>
+                  </div>
+                </div>
+              )}
               <button
                 onClick={onOpenSelector}
                 style={{
@@ -446,7 +464,7 @@ const inputStyle = {
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
-export default function SquadManagement({ teams, onAddPlayer, squadState, onSquadStateChange }) {
+export default function SquadManagement({ teams, onAddPlayer, squadState, onSquadStateChange, events }) {
   const { selectedTeam, showSelector, teamSelections } = squadState;
 
   const setSelectedTeam = (id) => onSquadStateChange({ ...squadState, selectedTeam: id, showSelector: false });
@@ -484,6 +502,7 @@ export default function SquadManagement({ teams, onAddPlayer, squadState, onSqua
       onOpenSelector={() => setShowSelector(true)}
       onAddPlayer={player => onAddPlayer(selectedTeam, player)}
       onBack={() => setSelectedTeam(null)}
+      events={events}
     />
   );
 }

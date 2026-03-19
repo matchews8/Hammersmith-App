@@ -46,6 +46,31 @@ export function initSelection() {
   return { formation: "4-3-3", slots, bench: [] };
 }
 
+export const INITIAL_EVENTS = [
+  {
+    id: "evt_1",
+    title: "vs Ealing Rangers",
+    type: "match",
+    team: "1s",
+    date: "2025-03-29",
+    time: "10:30",
+    location: "Hurlingham Park",
+    opponent: "Ealing Rangers",
+    homeAway: "home",
+  },
+  {
+    id: "evt_2",
+    title: "vs Fulham Casuals",
+    type: "match",
+    team: "2s",
+    date: "2025-03-30",
+    time: "11:00",
+    location: "Bishops Park",
+    opponent: "Fulham Casuals",
+    homeAway: "away",
+  },
+];
+
 export const INITIAL_TEAMS = {
   "1s": {
     id: "1s",

@@ -42,52 +42,6 @@ function StatBox({ value, label }) {
   );
 }
 
-// ─── Calendar ─────────────────────────────────────────────────────────────────
-
-export function Calendar() {
-  const months = ["March 2025"];
-  const fixtures = [
-    { date: "22 Mar", team: "Hammersmith 1s", opponent: "Northgate Athletic", time: "10:30am", venue: "Hurlingham Park", type: "Home" },
-    { date: "29 Mar", team: "Hammersmith 1s", opponent: "Ealing Rangers", time: "10:30am", venue: "Hurlingham Park", type: "Home" },
-    { date: "30 Mar", team: "Hammersmith 2s", opponent: "Fulham Casuals", time: "11:00am", venue: "Bishops Park", type: "Away" },
-    { date: "5 Apr", team: "Hammersmith 1s", opponent: "Wandsworth United", time: "11:00am", venue: "Clapham Common", type: "Away" },
-    { date: "6 Apr", team: "Hammersmith 2s", opponent: "Chiswick Town", time: "10:00am", venue: "Hurlingham Park", type: "Home" },
-  ];
-
-  return (
-    <PlaceholderShell title="CALENDAR" subtitle="Fixtures & events for Hammersmith FC">
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 640 }}>
-        {fixtures.map((f, i) => (
-          <div key={i} style={{
-            background: "#141414", border: "1px solid #1f1f1f",
-            borderRadius: 6, padding: "12px 16px",
-            display: "flex", alignItems: "center", gap: 16,
-          }}>
-            <div style={{
-              width: 48, textAlign: "center", flexShrink: 0,
-            }}>
-              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: 20, color: "#cc0000", lineHeight: 1 }}>
-                {f.date.split(" ")[0]}
-              </div>
-              <div style={{ fontSize: 10, color: "#555" }}>{f.date.split(" ")[1]}</div>
-            </div>
-            <div style={{ width: 1, height: 32, background: "#1f1f1f" }}/>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, color: "#e8e8e8", fontWeight: 600 }}>vs {f.opponent}</div>
-              <div style={{ fontSize: 11, color: "#555", marginTop: 2 }}>{f.team} · {f.time} · {f.venue}</div>
-            </div>
-            <div style={{
-              fontSize: 10, fontWeight: 700, letterSpacing: 1,
-              color: f.type === "Home" ? "#22c55e" : "#f59e0b",
-              fontFamily: "'Barlow Condensed', sans-serif",
-            }}>{f.type}</div>
-          </div>
-        ))}
-      </div>
-    </PlaceholderShell>
-  );
-}
-
 // ─── Physio ───────────────────────────────────────────────────────────────────
 
 export function Physio() {

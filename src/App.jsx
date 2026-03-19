@@ -1,31 +1,35 @@
 import { useState } from "react";
-import { INITIAL_TEAMS, initSelection } from "./data";
+import { INITIAL_TEAMS, INITIAL_EVENTS, initSelection } from "./data";
 import Sidebar from "./components/Sidebar";
 import SquadManagement from "./components/SquadManagement";
-import { Calendar, Physio, Availability, ClubHistory, Documents } from "./components/Placeholders";
+import CalendarView from "./components/Calendar";
+import { Physio, Availability, ClubHistory, Documents } from "./components/Placeholders";
 
 export default function App() {
   const [activeNav, setActiveNav] = useState("squad");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [teams, setTeams] = useState(INITIAL_TEAMS);
 
-  // All squad management navigation state lives here so it persists across nav switches
+  // All calendar events — shared across Calendar and Squad Management
+  const [events, setEvents] = useState(INITIAL_EVENTS);
+
+  // Calendar month/year — persists when navigating away and back
+  const [calendarState, setCalendarState] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
+
+  // Squad management navigation — persists across sidebar nav switches
   const [squadState, setSquadState] = useState({
-    selectedTeam: null,   // null | "1s" | "2s"
-    showSelector: false,  // whether the pitch selector view is active
-    teamSelections: {
-      "1s": initSelection(),
-      "2s": initSelection(),
-    },
+    selectedTeam: null,
+    showSelector: false,
+    teamSelections: { "1s": initSelection(), "2s": initSelection() },
   });
 
   const addPlayer = (teamId, player) => {
     setTeams(prev => ({
       ...prev,
-      [teamId]: {
-        ...prev[teamId],
-        players: [...prev[teamId].players, player],
-      },
+      [teamId]: { ...prev[teamId], players: [...prev[teamId].players, player] },
     }));
   };
 
@@ -38,9 +42,18 @@ export default function App() {
             onAddPlayer={addPlayer}
             squadState={squadState}
             onSquadStateChange={setSquadState}
+            events={events}
           />
         );
-      case "calendar":    return <Calendar />;
+      case "calendar":
+        return (
+          <CalendarView
+            events={events}
+            onEventsChange={setEvents}
+            calendarState={calendarState}
+            onCalendarStateChange={setCalendarState}
+          />
+        );
       case "physio":      return <Physio />;
       case "availability":return <Availability />;
       case "history":     return <ClubHistory />;
@@ -67,7 +80,6 @@ export default function App() {
         button { font-family: inherit; }
       `}</style>
 
-      {/* Sidebar is always rendered outside main — never obscured */}
       <Sidebar
         activeNav={activeNav}
         setActiveNav={setActiveNav}
@@ -75,8 +87,11 @@ export default function App() {
         setSidebarOpen={setSidebarOpen}
       />
 
-      <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
-        {/* Top bar */}
+      {/* position: relative so modal backdrops scope to this area, not the sidebar */}
+      <main style={{
+        flex: 1, display: "flex", flexDirection: "column",
+        overflow: "hidden", minWidth: 0, position: "relative",
+      }}>
         <div style={{
           background: "#141414", borderBottom: "1px solid #1f1f1f",
           padding: "0 24px", height: 52, display: "flex", alignItems: "center",
