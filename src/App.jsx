@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { INITIAL_TEAMS } from "./data";
+import { INITIAL_TEAMS, initSelection } from "./data";
 import Sidebar from "./components/Sidebar";
 import SquadManagement from "./components/SquadManagement";
 import { Calendar, Physio, Availability, ClubHistory, Documents } from "./components/Placeholders";
@@ -8,6 +8,16 @@ export default function App() {
   const [activeNav, setActiveNav] = useState("squad");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [teams, setTeams] = useState(INITIAL_TEAMS);
+
+  // All squad management navigation state lives here so it persists across nav switches
+  const [squadState, setSquadState] = useState({
+    selectedTeam: null,   // null | "1s" | "2s"
+    showSelector: false,  // whether the pitch selector view is active
+    teamSelections: {
+      "1s": initSelection(),
+      "2s": initSelection(),
+    },
+  });
 
   const addPlayer = (teamId, player) => {
     setTeams(prev => ({
@@ -21,7 +31,15 @@ export default function App() {
 
   const renderContent = () => {
     switch (activeNav) {
-      case "squad":        return <SquadManagement teams={teams} onAddPlayer={addPlayer} />;
+      case "squad":
+        return (
+          <SquadManagement
+            teams={teams}
+            onAddPlayer={addPlayer}
+            squadState={squadState}
+            onSquadStateChange={setSquadState}
+          />
+        );
       case "calendar":    return <Calendar />;
       case "physio":      return <Physio />;
       case "availability":return <Availability />;
@@ -49,6 +67,7 @@ export default function App() {
         button { font-family: inherit; }
       `}</style>
 
+      {/* Sidebar is always rendered outside main — never obscured */}
       <Sidebar
         activeNav={activeNav}
         setActiveNav={setActiveNav}
@@ -64,9 +83,7 @@ export default function App() {
           justifyContent: "space-between", flexShrink: 0,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{
-              width: 6, height: 6, borderRadius: "50%", background: "#cc0000",
-            }}/>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#cc0000" }}/>
             <span style={{ fontSize: 11, color: "#444", letterSpacing: 0.5 }}>
               Pitchside Admin · Hammersmith FC
             </span>

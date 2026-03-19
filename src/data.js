@@ -40,6 +40,12 @@ export const FORMATION_SLOTS = {
   ],
 };
 
+export function initSelection() {
+  const slots = {};
+  FORMATION_SLOTS["4-3-3"].forEach(sl => (slots[sl.id] = null));
+  return { formation: "4-3-3", slots, bench: [] };
+}
+
 export const INITIAL_TEAMS = {
   "1s": {
     id: "1s",

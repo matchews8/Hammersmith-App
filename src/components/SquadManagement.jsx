@@ -1,15 +1,8 @@
 import { useState } from "react";
-import { FORMATION_SLOTS } from "../data";
 import SquadSelector from "./SquadSelector";
 
 const POS_COLOR = { GK: "#f59e0b", DEF: "#3b82f6", MID: "#22c55e", FWD: "#ef4444" };
 const POS_LABEL = { GK: "Goalkeepers", DEF: "Defenders", MID: "Midfielders", FWD: "Forwards" };
-
-function initSelection() {
-  const slots = {};
-  FORMATION_SLOTS["4-3-3"].forEach(sl => (slots[sl.id] = null));
-  return { formation: "4-3-3", slots, bench: [] };
-}
 
 // ─── Team Cards ──────────────────────────────────────────────────────────────
 
@@ -74,9 +67,7 @@ function TeamCard({ team, onClick }) {
           fontFamily: "'Barlow Condensed', sans-serif", marginBottom: 8,
         }}>NEXT MATCH</div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-          <div style={{
-            width: 6, height: 6, borderRadius: "50%", background: "#cc0000", flexShrink: 0,
-          }}/>
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#cc0000", flexShrink: 0 }}/>
           <span style={{ fontSize: 14, color: "#e8e8e8", fontWeight: 600 }}>vs {team.match.opponent}</span>
         </div>
         <div style={{ fontSize: 12, color: "#666", paddingLeft: 12 }}>{team.match.date} · {team.match.time}</div>
@@ -100,7 +91,7 @@ function TeamCard({ team, onClick }) {
 
 // ─── Team View ────────────────────────────────────────────────────────────────
 
-function TeamView({ team, selection, onUpdateSelection, onOpenSelector, onAddPlayer, onBack }) {
+function TeamView({ team, selection, onOpenSelector, onAddPlayer, onBack }) {
   const [showAddModal, setShowAddModal] = useState(false);
 
   const xiCount = Object.values(selection.slots).filter(Boolean).length;
@@ -163,7 +154,6 @@ function TeamView({ team, selection, onUpdateSelection, onOpenSelector, onAddPla
               fontFamily: "'Barlow Condensed', sans-serif", marginBottom: 12,
             }}>MATCH HUB</div>
 
-            {/* Upcoming match card */}
             <div style={{
               background: "#141414", border: "1px solid #1f1f1f",
               borderRadius: 8, padding: "20px 22px",
@@ -186,9 +176,9 @@ function TeamView({ team, selection, onUpdateSelection, onOpenSelector, onAddPla
 
               <div style={{ display: "flex", gap: 16, marginBottom: 18 }}>
                 {[
-                  { icon: "📅", label: "Date", value: team.match.date },
-                  { icon: "🕐", label: "Kick-off", value: team.match.time },
-                  { icon: "📍", label: "Venue", value: team.match.location },
+                  { label: "Date", value: team.match.date },
+                  { label: "Kick-off", value: team.match.time },
+                  { label: "Venue", value: team.match.location },
                 ].map(item => (
                   <div key={item.label} style={{
                     background: "#1a1a1a", borderRadius: 6, padding: "10px 14px", flex: 1,
@@ -205,8 +195,7 @@ function TeamView({ team, selection, onUpdateSelection, onOpenSelector, onAddPla
                   width: "100%", background: "#cc0000", border: "none", color: "white",
                   padding: "10px 0", borderRadius: 5, cursor: "pointer",
                   fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
-                  fontSize: 14, letterSpacing: 1,
-                  transition: "background 0.15s",
+                  fontSize: 14, letterSpacing: 1, transition: "background 0.15s",
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = "#e60000"}
                 onMouseLeave={e => e.currentTarget.style.background = "#cc0000"}
@@ -374,7 +363,7 @@ function AddPlayerModal({ teamName, onAdd, onClose }) {
         onClick={e => e.stopPropagation()}
         style={{
           background: "#161616", border: "1px solid #222",
-          borderRadius: 8, padding: "28px 28px",
+          borderRadius: 8, padding: "28px",
           width: 360, boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
         }}
       >
@@ -389,12 +378,9 @@ function AddPlayerModal({ teamName, onAdd, onClose }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <Field label="Full Name">
               <input
-                autoFocus
-                type="text"
-                value={form.name}
+                autoFocus type="text" value={form.name}
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                placeholder="e.g. Jamie Smith"
-                style={inputStyle}
+                placeholder="e.g. Jamie Smith" style={inputStyle}
               />
             </Field>
             <Field label="Position">
@@ -411,40 +397,26 @@ function AddPlayerModal({ teamName, onAdd, onClose }) {
             </Field>
             <Field label="Squad Number">
               <input
-                type="number"
-                min="1"
-                max="99"
-                value={form.number}
+                type="number" min="1" max="99" value={form.number}
                 onChange={e => setForm(f => ({ ...f, number: e.target.value }))}
-                placeholder="e.g. 17"
-                style={inputStyle}
+                placeholder="e.g. 17" style={inputStyle}
               />
             </Field>
           </div>
 
-          {error && (
-            <div style={{ marginTop: 10, fontSize: 11, color: "#ef4444" }}>{error}</div>
-          )}
+          {error && <div style={{ marginTop: 10, fontSize: 11, color: "#ef4444" }}>{error}</div>}
 
           <div style={{ display: "flex", gap: 8, marginTop: 22 }}>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                flex: 1, background: "none", border: "1px solid #2a2a2a",
-                color: "#555", padding: "9px 0", borderRadius: 4, cursor: "pointer",
-                fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 0.5,
-                transition: "border-color 0.15s",
-              }}
-            >CANCEL</button>
-            <button
-              type="submit"
-              style={{
-                flex: 2, background: "#cc0000", border: "none", color: "white",
-                padding: "9px 0", borderRadius: 4, cursor: "pointer",
-                fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 0.5,
-                transition: "background 0.15s",
-              }}
+            <button type="button" onClick={onClose} style={{
+              flex: 1, background: "none", border: "1px solid #2a2a2a",
+              color: "#555", padding: "9px 0", borderRadius: 4, cursor: "pointer",
+              fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 0.5,
+            }}>CANCEL</button>
+            <button type="submit" style={{
+              flex: 2, background: "#cc0000", border: "none", color: "white",
+              padding: "9px 0", borderRadius: 4, cursor: "pointer",
+              fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 0.5,
+            }}
               onMouseEnter={e => e.currentTarget.style.background = "#e60000"}
               onMouseLeave={e => e.currentTarget.style.background = "#cc0000"}
             >ADD TO SQUAD</button>
@@ -469,23 +441,22 @@ function Field({ label, children }) {
 const inputStyle = {
   width: "100%", background: "#1a1a1a", border: "1px solid #2a2a2a",
   borderRadius: 4, padding: "9px 12px", color: "#e8e8e8", fontSize: 13,
-  fontFamily: "'Barlow', sans-serif", outline: "none",
-  transition: "border-color 0.15s",
+  fontFamily: "'Barlow', sans-serif", outline: "none", transition: "border-color 0.15s",
 };
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
-export default function SquadManagement({ teams, onAddPlayer }) {
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [showSelector, setShowSelector] = useState(false);
-  const [teamSelections, setTeamSelections] = useState({
-    "1s": initSelection(),
-    "2s": initSelection(),
+export default function SquadManagement({ teams, onAddPlayer, squadState, onSquadStateChange }) {
+  const { selectedTeam, showSelector, teamSelections } = squadState;
+
+  const setSelectedTeam = (id) => onSquadStateChange({ ...squadState, selectedTeam: id, showSelector: false });
+  const setShowSelector = (val) => onSquadStateChange({ ...squadState, showSelector: val });
+  const updateSelection = (teamId, sel) => onSquadStateChange({
+    ...squadState,
+    teamSelections: { ...teamSelections, [teamId]: sel },
   });
 
-  const updateSelection = (teamId, sel) =>
-    setTeamSelections(prev => ({ ...prev, [teamId]: sel }));
-
+  // No team selected → show team cards
   if (!selectedTeam) {
     return <TeamCards teams={teams} onSelect={setSelectedTeam} />;
   }
@@ -493,24 +464,26 @@ export default function SquadManagement({ teams, onAddPlayer }) {
   const team = teams[selectedTeam];
   const selection = teamSelections[selectedTeam];
 
-  return (
-    <>
-      <TeamView
+  // Selector open → render squad selector inline (replaces team view, sidebar stays visible)
+  if (showSelector) {
+    return (
+      <SquadSelector
         team={team}
         selection={selection}
         onUpdateSelection={sel => updateSelection(selectedTeam, sel)}
-        onOpenSelector={() => setShowSelector(true)}
-        onAddPlayer={player => onAddPlayer(selectedTeam, player)}
-        onBack={() => setSelectedTeam(null)}
+        onBack={() => setShowSelector(false)}
       />
-      {showSelector && (
-        <SquadSelector
-          team={team}
-          selection={selection}
-          onUpdateSelection={sel => updateSelection(selectedTeam, sel)}
-          onClose={() => setShowSelector(false)}
-        />
-      )}
-    </>
+    );
+  }
+
+  // Team selected, selector closed → show team view
+  return (
+    <TeamView
+      team={team}
+      selection={selection}
+      onOpenSelector={() => setShowSelector(true)}
+      onAddPlayer={player => onAddPlayer(selectedTeam, player)}
+      onBack={() => setSelectedTeam(null)}
+    />
   );
 }
